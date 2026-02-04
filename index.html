@@ -1,31 +1,189 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <title>Yigit54437Celo</title>
-      <style>
-body {
-    margin: 0;
-    background-image: url("background.png");
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center 20%;
-    min-height: 100vh;
-    color: white;
-}
-</style>
-<script>
-    function test(){
-        console.log("Log yazıyorum");    }
-</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Sayaç & Saat</title>
+
+  <style>
+    :root {
+      --bg: #020617;
+      --panel: #0f172a;
+      --card: #111827;
+      --primary: #38bdf8;
+      --danger: #ef4444;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #020617, #020617, #0f172a);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dashboard {
+      width: 100%;
+      max-width: 420px;
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 25px 60px rgba(0,0,0,.6);
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .clock {
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--primary);
+    }
+
+    .counter {
+      font-size: 48px;
+      font-weight: 800;
+      margin: 10px 0 16px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      background: #1e293b;
+      color: var(--text);
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: var(--primary);
+      color: #020617;
+    }
+
+    button.danger:hover {
+      background: var(--danger);
+      color: #020617;
+    }
+
+    footer {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+  </style>
 </head>
+
 <body>
-<submit onclick="test()">Gönder</submit>
- 
-    
-    <h1 style="font-size: 24px;">     Hoş geldin!</h1>
-    <p style="font-size: 16px;">     Bu site hazırlanıyor.</p>
-    <p style="font-size: 16px;">     Yakında açılacaktır
-    </p>
+
+  <div class="dashboard">
+    <h1>Online Sayaç & Saat</h1>
+    <div class="subtitle">Gerçek zamanlı, kalıcı ve hızlı</div>
+
+    <!-- Saat -->
+    <div class="card">
+      <div class="label">Saat</div>
+      <div id="clock" class="clock">--:--:--</div>
+    </div>
+
+    <!-- Sayaç -->
+    <div class="card">
+      <div class="label">Sayaç</div>
+      <div id="counter" class="counter">0</div>
+
+      <div class="buttons">
+        <button onclick="azalt()">−</button>
+        <button onclick="arttir()">+</button>
+        <button class="danger" onclick="sifirla()">Sıfırla</button>
+      </div>
+    </div>
+
+    <footer>
+      © 2026 • GitHub Pages
+    </footer>
+  </div>
+
+  <script>
+    /* ===== Saat ===== */
+    function saatGuncelle() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      const s = String(now.getSeconds()).padStart(2, "0");
+      document.getElementById("clock").textContent = `${h}:${m}:${s}`;
+    }
+    setInterval(saatGuncelle, 1000);
+    saatGuncelle();
+
+    /* ===== Sayaç ===== */
+    let sayac = Number(localStorage.getItem("sayac")) || 0;
+    const counterEl = document.getElementById("counter");
+
+    function render() {
+      counterEl.textContent = sayac;
+      localStorage.setItem("sayac", sayac);
+    }
+
+    function arttir() {
+      sayac++;
+      render();
+    }
+
+    function azalt() {
+      sayac--;
+      render();
+    }
+
+    function sifirla() {
+      sayac = 0;
+      render();
+    }
+
+    render();
+  </script>
+
 </body>
 </html>
