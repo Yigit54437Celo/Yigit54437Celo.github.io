@@ -1,242 +1,169 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zaman Sayacı & Kronometre</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zaman Uygulaması</title>
 
-  <style>
-    :root {
-      --bg: #020617;
-      --panel: #0f172a;
-      --card: #111827;
-      --primary: #38bdf8;
-      --danger: #ef4444;
-      --text: #e5e7eb;
-      --muted: #94a3b8;
-    }
+<style>
+:root{
+  --bg:#020617;
+  --panel:#0f172a;
+  --card:#111827;
+  --primary:#38bdf8;
+  --danger:#ef4444;
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+}
 
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+*{box-sizing:border-box;font-family:system-ui,sans-serif}
 
-    body {
-      margin: 0;
-      background: linear-gradient(135deg, #020617, #0f172a);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+body{
+  margin:0;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
-    .dashboard {
-      width: 100%;
-      max-width: 460px;
-      background: var(--panel);
-      border-radius: 18px;
-      padding: 24px;
-      box-shadow: 0 30px 70px rgba(0,0,0,.6);
-    }
+.dashboard{
+  width:100%;
+  max-width:480px;
+  background:var(--panel);
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 30px 70px rgba(0,0,0,.6);
+}
 
-    h1 {
-      margin: 0 0 16px;
-      font-size: 22px;
-      text-align: center;
-    }
+h1{
+  text-align:center;
+  margin:0 0 16px;
+}
 
-    .card {
-      background: var(--card);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
+.card{
+  background:var(--card);
+  border-radius:14px;
+  padding:20px;
+  margin-bottom:16px;
+  text-align:center;
+}
 
-    .label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
+.label{
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:6px;
+  text-transform:uppercase;
+}
 
-    .time {
-      font-size: 40px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      color: var(--primary);
-      margin: 10px 0 16px;
-    }
+.time{
+  font-size:38px;
+  font-weight:800;
+  color:var(--primary);
+  margin:8px 0 16px;
+  letter-spacing:2px;
+}
 
-    .inputs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
+.inputs, .buttons{
+  display:flex;
+  gap:8px;
+  margin-bottom:10px;
+}
 
-    input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      background: #1e293b;
-      color: var(--text);
-      text-align: center;
-      font-size: 14px;
-    }
+input{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#1e293b;
+  color:var(--text);
+  text-align:center;
+}
 
-    .buttons {
-      display: flex;
-      gap: 10px;
-    }
+button{
+  flex:1;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#1e293b;
+  color:var(--text);
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+}
 
-    button {
-      flex: 1;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      background: #1e293b;
-      color: var(--text);
-      transition: .2s;
-    }
+button:hover{
+  background:var(--primary);
+  color:#020617;
+}
 
-    button:hover {
-      background: var(--primary);
-      color: #020617;
-    }
+button.danger:hover{
+  background:var(--danger);
+}
 
-    button.danger:hover {
-      background: var(--danger);
-    }
-
-    footer {
-      text-align: center;
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-  </style>
+footer{
+  text-align:center;
+  font-size:11px;
+  color:var(--muted);
+}
+</style>
 </head>
 
 <body>
 
-  <div class="dashboard">
-    <h1>⏱ Zaman Sayacı & Kronometre</h1>
+<div class="dashboard">
+<h1>⏰ Zaman Uygulaması</h1>
 
-    <!-- ZAMAN SAYACI -->
-    <div class="card">
-      <div class="label">Zaman Sayacı (Geri Sayım)</div>
-      <div id="timerDisplay" class="time">00:00:00</div>
+<!-- SAAT -->
+<div class="card">
+  <div class="label">Canlı Saat</div>
+  <div id="clock" class="time">--:--:--</div>
+</div>
 
-      <div class="inputs">
-        <input type="number" id="hours" placeholder="Saat" min="0">
-        <input type="number" id="minutes" placeholder="Dakika" min="0">
-        <input type="number" id="seconds" placeholder="Saniye" min="0">
-      </div>
-
-      <div class="buttons">
-        <button onclick="timerStart()">Başlat</button>
-        <button class="danger" onclick="timerReset()">Sıfırla</button>
-      </div>
-    </div>
-
-    <!-- KRONOMETRE -->
-    <div class="card">
-      <div class="label">Kronometre</div>
-      <div id="stopwatchDisplay" class="time">00:00:00.000</div>
-
-      <div class="buttons">
-        <button onclick="swStart()">Başlat</button>
-        <button onclick="swPause()">Duraklat</button>
-        <button class="danger" onclick="swReset()">Sıfırla</button>
-      </div>
-    </div>
-
-    <footer>© 2026 • GitHub Pages</footer>
+<!-- ALARM -->
+<div class="card">
+  <div class="label">Alarm</div>
+  <input type="time" id="alarmTime">
+  <div class="buttons">
+    <button onclick="setAlarm()">Kur</button>
+    <button class="danger" onclick="stopAlarm()">Kapat</button>
   </div>
+</div>
 
-  <script>
-    /* ===== TIMER ===== */
-    let timerInterval;
-    let remaining = 0;
+<!-- TIMER -->
+<div class="card">
+  <div class="label">Zaman Sayacı</div>
+  <div id="timerDisplay" class="time">00:00:00</div>
+  <div class="inputs">
+    <input type="number" id="th" placeholder="Saat">
+    <input type="number" id="tm" placeholder="Dakika">
+    <input type="number" id="ts" placeholder="Saniye">
+  </div>
+  <div class="buttons">
+    <button onclick="timerStart()">Başlat</button>
+    <button class="danger" onclick="timerReset()">Sıfırla</button>
+  </div>
+</div>
 
-    function timerStart() {
-      clearInterval(timerInterval);
+<!-- KRONOMETRE -->
+<div class="card">
+  <div class="label">Kronometre</div>
+  <div id="sw" class="time">00:00:00.000</div>
+  <div class="buttons">
+    <button onclick="swStart()">Başlat</button>
+    <button onclick="swPause()">Duraklat</button>
+    <button class="danger" onclick="swReset()">Sıfırla</button>
+  </div>
+</div>
 
-      if (remaining <= 0) {
-        const h = Number(hours.value || 0);
-        const m = Number(minutes.value || 0);
-        const s = Number(seconds.value || 0);
-        remaining = h * 3600 + m * 60 + s;
-      }
+<footer>© 2026 • GitHub Pages</footer>
+</div>
 
-      timerInterval = setInterval(() => {
-        if (remaining <= 0) {
-          clearInterval(timerInterval);
-          return;
-        }
-        remaining--;
-        renderTimer();
-      }, 1000);
-    }
-
-    function timerReset() {
-      clearInterval(timerInterval);
-      remaining = 0;
-      renderTimer();
-    }
-
-    function renderTimer() {
-      const h = String(Math.floor(remaining / 3600)).padStart(2, "0");
-      const m = String(Math.floor((remaining % 3600) / 60)).padStart(2, "0");
-      const s = String(remaining % 60).padStart(2, "0");
-      timerDisplay.textContent = `${h}:${m}:${s}`;
-    }
-
-    renderTimer();
-
-    /* ===== STOPWATCH ===== */
-    let swStartTime = 0;
-    let swElapsed = 0;
-    let swInterval;
-
-    function swStart() {
-      swStartTime = performance.now() - swElapsed;
-      clearInterval(swInterval);
-      swInterval = setInterval(() => {
-        swElapsed = performance.now() - swStartTime;
-        renderSW();
-      }, 10);
-    }
-
-    function swPause() {
-      clearInterval(swInterval);
-    }
-
-    function swReset() {
-      clearInterval(swInterval);
-      swElapsed = 0;
-      renderSW();
-    }
-
-    function renderSW() {
-      const ms = Math.floor(swElapsed % 1000);
-      const totalSec = Math.floor(swElapsed / 1000);
-      const s = totalSec % 60;
-      const m = Math.floor(totalSec / 60) % 60;
-      const h = Math.floor(totalSec / 3600);
-
-      stopwatchDisplay.textContent =
-        `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}.${String(ms).padStart(3,"0")}`;
-    }
-
-    renderSW();
-  </script>
-
-</body>
-</html>
+<script>
+/* SAAT */
+setInterval(()=>{
+  const d=new Date();
+  clock.textContent=
+    `${String(d.getHours()).padStart(2,"0")}:`+
+    `${
