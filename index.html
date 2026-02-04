@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Online Sayaç & Saat</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zaman Sayacı & Kronometre</title>
 
   <style>
     :root {
@@ -23,7 +23,7 @@
 
     body {
       margin: 0;
-      background: linear-gradient(135deg, #020617, #020617, #0f172a);
+      background: linear-gradient(135deg, #020617, #0f172a);
       color: var(--text);
       min-height: 100vh;
       display: flex;
@@ -33,22 +33,17 @@
 
     .dashboard {
       width: 100%;
-      max-width: 420px;
+      max-width: 460px;
       background: var(--panel);
       border-radius: 18px;
       padding: 24px;
-      box-shadow: 0 25px 60px rgba(0,0,0,.6);
+      box-shadow: 0 30px 70px rgba(0,0,0,.6);
     }
 
     h1 {
-      margin: 0 0 4px;
+      margin: 0 0 16px;
       font-size: 22px;
-    }
-
-    .subtitle {
-      color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 20px;
+      text-align: center;
     }
 
     .card {
@@ -63,21 +58,33 @@
       font-size: 12px;
       color: var(--muted);
       margin-bottom: 6px;
-      letter-spacing: 0.5px;
       text-transform: uppercase;
+      letter-spacing: .5px;
     }
 
-    .clock {
-      font-size: 34px;
-      font-weight: 700;
+    .time {
+      font-size: 40px;
+      font-weight: 800;
       letter-spacing: 2px;
       color: var(--primary);
+      margin: 10px 0 16px;
     }
 
-    .counter {
-      font-size: 48px;
-      font-weight: 800;
-      margin: 10px 0 16px;
+    .inputs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #1e293b;
+      color: var(--text);
+      text-align: center;
+      font-size: 14px;
     }
 
     .buttons {
@@ -95,7 +102,7 @@
       font-weight: 600;
       background: #1e293b;
       color: var(--text);
-      transition: 0.2s;
+      transition: .2s;
     }
 
     button:hover {
@@ -105,14 +112,13 @@
 
     button.danger:hover {
       background: var(--danger);
-      color: #020617;
     }
 
     footer {
-      margin-top: 10px;
       text-align: center;
       font-size: 11px;
       color: var(--muted);
+      margin-top: 6px;
     }
   </style>
 </head>
@@ -120,69 +126,116 @@
 <body>
 
   <div class="dashboard">
-    <h1>Online Sayaç & Saat</h1>
-    <div class="subtitle">Gerçek zamanlı, kalıcı ve hızlı</div>
+    <h1>⏱ Zaman Sayacı & Kronometre</h1>
 
-    <!-- Saat -->
+    <!-- ZAMAN SAYACI -->
     <div class="card">
-      <div class="label">Saat</div>
-      <div id="clock" class="clock">--:--:--</div>
-    </div>
+      <div class="label">Zaman Sayacı (Geri Sayım)</div>
+      <div id="timerDisplay" class="time">00:00:00</div>
 
-    <!-- Sayaç -->
-    <div class="card">
-      <div class="label">Sayaç</div>
-      <div id="counter" class="counter">0</div>
+      <div class="inputs">
+        <input type="number" id="hours" placeholder="Saat" min="0">
+        <input type="number" id="minutes" placeholder="Dakika" min="0">
+        <input type="number" id="seconds" placeholder="Saniye" min="0">
+      </div>
 
       <div class="buttons">
-        <button onclick="azalt()">−</button>
-        <button onclick="arttir()">+</button>
-        <button class="danger" onclick="sifirla()">Sıfırla</button>
+        <button onclick="timerStart()">Başlat</button>
+        <button class="danger" onclick="timerReset()">Sıfırla</button>
       </div>
     </div>
 
-    <footer>
-      © 2026 • GitHub Pages
-    </footer>
+    <!-- KRONOMETRE -->
+    <div class="card">
+      <div class="label">Kronometre</div>
+      <div id="stopwatchDisplay" class="time">00:00:00.000</div>
+
+      <div class="buttons">
+        <button onclick="swStart()">Başlat</button>
+        <button onclick="swPause()">Duraklat</button>
+        <button class="danger" onclick="swReset()">Sıfırla</button>
+      </div>
+    </div>
+
+    <footer>© 2026 • GitHub Pages</footer>
   </div>
 
   <script>
-    /* ===== Saat ===== */
-    function saatGuncelle() {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, "0");
-      const m = String(now.getMinutes()).padStart(2, "0");
-      const s = String(now.getSeconds()).padStart(2, "0");
-      document.getElementById("clock").textContent = `${h}:${m}:${s}`;
-    }
-    setInterval(saatGuncelle, 1000);
-    saatGuncelle();
+    /* ===== TIMER ===== */
+    let timerInterval;
+    let remaining = 0;
 
-    /* ===== Sayaç ===== */
-    let sayac = Number(localStorage.getItem("sayac")) || 0;
-    const counterEl = document.getElementById("counter");
+    function timerStart() {
+      clearInterval(timerInterval);
 
-    function render() {
-      counterEl.textContent = sayac;
-      localStorage.setItem("sayac", sayac);
-    }
+      if (remaining <= 0) {
+        const h = Number(hours.value || 0);
+        const m = Number(minutes.value || 0);
+        const s = Number(seconds.value || 0);
+        remaining = h * 3600 + m * 60 + s;
+      }
 
-    function arttir() {
-      sayac++;
-      render();
-    }
-
-    function azalt() {
-      sayac--;
-      render();
+      timerInterval = setInterval(() => {
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          return;
+        }
+        remaining--;
+        renderTimer();
+      }, 1000);
     }
 
-    function sifirla() {
-      sayac = 0;
-      render();
+    function timerReset() {
+      clearInterval(timerInterval);
+      remaining = 0;
+      renderTimer();
     }
 
-    render();
+    function renderTimer() {
+      const h = String(Math.floor(remaining / 3600)).padStart(2, "0");
+      const m = String(Math.floor((remaining % 3600) / 60)).padStart(2, "0");
+      const s = String(remaining % 60).padStart(2, "0");
+      timerDisplay.textContent = `${h}:${m}:${s}`;
+    }
+
+    renderTimer();
+
+    /* ===== STOPWATCH ===== */
+    let swStartTime = 0;
+    let swElapsed = 0;
+    let swInterval;
+
+    function swStart() {
+      swStartTime = performance.now() - swElapsed;
+      clearInterval(swInterval);
+      swInterval = setInterval(() => {
+        swElapsed = performance.now() - swStartTime;
+        renderSW();
+      }, 10);
+    }
+
+    function swPause() {
+      clearInterval(swInterval);
+    }
+
+    function swReset() {
+      clearInterval(swInterval);
+      swElapsed = 0;
+      renderSW();
+    }
+
+    function renderSW() {
+      const ms = Math.floor(swElapsed % 1000);
+      const totalSec = Math.floor(swElapsed / 1000);
+      const s = totalSec % 60;
+      const m = Math.floor(totalSec / 60) % 60;
+      const h = Math.floor(totalSec / 3600);
+
+      stopwatchDisplay.textContent =
+        `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}.${String(ms).padStart(3,"0")}`;
+    }
+
+    renderSW();
   </script>
 
 </body>
