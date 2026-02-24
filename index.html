@@ -2,94 +2,174 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bütçe Takip</title>
+<title>Pro Bütçe Takip</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f4f4f4;
-        display: flex;
-        justify-content: center;
-        margin-top: 50px;
-    }
-    .container {
-        background: white;
-        padding: 20px;
-        width: 350px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h2 {
-        text-align: center;
-    }
-    input, button {
-        width: 100%;
-        padding: 8px;
-        margin: 5px 0;
-    }
-    button {
-        background: #28a745;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
-    button:hover {
-        background: #218838;
-    }
-    ul {
-        list-style: none;
-        padding: 0;
-    }
-    li {
-        background: #eee;
-        padding: 5px;
-        margin: 5px 0;
-        display: flex;
-        justify-content: space-between;
-    }
-    .total {
-        font-weight: bold;
-        margin-top: 10px;
-    }
+body{
+    font-family: Arial;
+    background: linear-gradient(135deg,#667eea,#764ba2);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+.box{
+    background:white;
+    padding:20px;
+    width:400px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+input,select,button{
+    width:100%;
+    padding:8px;
+    margin:5px 0;
+}
+button{
+    background:#667eea;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+button:hover{opacity:0.9}
+ul{padding:0;list-style:none}
+li{
+    display:flex;
+    justify-content:space-between;
+    background:#f2f2f2;
+    padding:6px;
+    margin:4px 0;
+}
+.hidden{display:none}
 </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Bütçe Takip</h2>
-    <input type="text" id="desc" placeholder="Açıklama">
-    <input type="number" id="amount" placeholder="Tutar (negatif = gider)">
-    <button onclick="addTransaction()">Ekle</button>
+<div class="box">
 
-    <ul id="list"></ul>
+<!-- LOGIN -->
+<div id="login">
+<h2>Giriş Yap</h2>
+<input type="password" id="pass" placeholder="Şifre oluştur / gir">
+<button onclick="login()">Giriş</button>
+</div>
 
-    <div class="total">
-        Toplam Bakiye: <span id="balance">0</span> ₺
-    </div>
+<!-- APP -->
+<div id="app" class="hidden">
+<h2>Bütçe Takip</h2>
+
+<input id="desc" placeholder="Açıklama">
+<input id="amount" type="number" placeholder="Tutar">
+<select id="category">
+<option value="Gelir">Gelir</option>
+<option value="Gıda">Gıda</option>
+<option value="Fatura">Fatura</option>
+<option value="Eğlence">Eğlence</option>
+</select>
+
+<button onclick="add()">Ekle</button>
+
+<ul id="list"></ul>
+
+<h3>Toplam: <span id="total">0</span> ₺</h3>
+
+<canvas id="chart"></canvas>
+
+<button onclick="logout()" style="background:red;margin-top:10px;">Çıkış</button>
+</div>
+
 </div>
 
 <script>
-    let balance = 1;
+let data = JSON.parse(localStorage.getItem("data")) || [];
+let password = localStorage.getItem("password");
+let total = 0;
+let chart;
 
-    function addTransaction() {
-        const desc = document.getElementById("desc").value;
-        const amount = parseFloat(document.getElementById("amount").value);
-
-        if (!desc || isNaN(amount)) {
-            alert("Lütfen geçerli değer girin.");
-            return;
-        }
-
-        balance += amount;
-        document.getElementById("balance").innerText = balance;
-
-        const li = document.createElement("li");
-        li.innerHTML = `${desc} <span>${amount} ₺</span>`;
-        document.getElementById("list").appendChild(li);
-
-        document.getElementById("desc").value = "";
-        document.getElementById("amount").value = "";
+function login(){
+    let p = document.getElementById("pass").value;
+    if(!password){
+        localStorage.setItem("password",p);
+        password = p;
     }
+    if(p===password){
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("app").classList.remove("hidden");
+        load();
+    }else{
+        alert("Şifre yanlış!");
+    }
+}
+
+function logout(){
+    location.reload();
+}
+
+function save(){
+    localStorage.setItem("data",JSON.stringify(data));
+}
+
+function add(){
+    let desc=document.getElementById("desc").value;
+    let amount=parseFloat(document.getElementById("amount").value);
+    let category=document.getElementById("category").value;
+
+    if(!desc || isNaN(amount)){alert("Boş bırakma!");return;}
+
+    data.push({desc,amount,category});
+    save();
+    load();
+
+    desc.value="";
+}
+
+function remove(index){
+    data.splice(index,1);
+    save();
+    load();
+}
+
+function load(){
+    let list=document.getElementById("list");
+    list.innerHTML="";
+    total=0;
+
+    let categories={};
+
+    data.forEach((item,i)=>{
+        total+=item.amount;
+
+        let li=document.createElement("li");
+        li.innerHTML=`
+        ${item.desc} (${item.category})
+        <span>
+        ${item.amount} ₺
+        <button onclick="remove(${i})">X</button>
+        </span>`;
+        list.appendChild(li);
+
+        categories[item.category]=(categories[item.category]||0)+item.amount;
+    });
+
+    document.getElementById("total").innerText=total;
+
+    drawChart(categories);
+}
+
+function drawChart(categories){
+    if(chart) chart.destroy();
+
+    chart=new Chart(document.getElementById("chart"),{
+        type:"pie",
+        data:{
+            labels:Object.keys(categories),
+            datasets:[{
+                data:Object.values(categories)
+            }]
+        }
+    });
+}
 </script>
 
 </body>
