@@ -3,167 +3,94 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zaman Uygulaması</title>
-
+<title>Bütçe Takip</title>
 <style>
-:root{
-  --bg:#020617;
-  --panel:#0f172a;
-  --card:#111827;
-  --primary:#38bdf8;
-  --danger:#ef4444;
-  --text:#e5e7eb;
-  --muted:#94a3b8;
-}
-
-*{box-sizing:border-box;font-family:system-ui,sans-serif}
-
-body{
-  margin:0;
-  background:linear-gradient(135deg,#020617,#0f172a);
-  color:var(--text);
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.dashboard{
-  width:100%;
-  max-width:480px;
-  background:var(--panel);
-  border-radius:18px;
-  padding:24px;
-  box-shadow:0 30px 70px rgba(0,0,0,.6);
-}
-
-h1{
-  text-align:center;
-  margin:0 0 16px;
-}
-
-.card{
-  background:var(--card);
-  border-radius:14px;
-  padding:20px;
-  margin-bottom:16px;
-  text-align:center;
-}
-
-.label{
-  font-size:12px;
-  color:var(--muted);
-  margin-bottom:6px;
-  text-transform:uppercase;
-}
-
-.time{
-  font-size:38px;
-  font-weight:800;
-  color:var(--primary);
-  margin:8px 0 16px;
-  letter-spacing:2px;
-}
-
-.inputs, .buttons{
-  display:flex;
-  gap:8px;
-  margin-bottom:10px;
-}
-
-input{
-  flex:1;
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  background:#1e293b;
-  color:var(--text);
-  text-align:center;
-}
-
-button{
-  flex:1;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#1e293b;
-  color:var(--text);
-  font-weight:600;
-  cursor:pointer;
-  transition:.2s;
-}
-
-button:hover{
-  background:var(--primary);
-  color:#020617;
-}
-
-button.danger:hover{
-  background:var(--danger);
-}
-
-footer{
-  text-align:center;
-  font-size:11px;
-  color:var(--muted);
-}
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        margin-top: 50px;
+    }
+    .container {
+        background: white;
+        padding: 20px;
+        width: 350px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+        text-align: center;
+    }
+    input, button {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+    }
+    button {
+        background: #28a745;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #218838;
+    }
+    ul {
+        list-style: none;
+        padding: 0;
+    }
+    li {
+        background: #eee;
+        padding: 5px;
+        margin: 5px 0;
+        display: flex;
+        justify-content: space-between;
+    }
+    .total {
+        font-weight: bold;
+        margin-top: 10px;
+    }
 </style>
 </head>
-
 <body>
 
-<div class="dashboard">
-<h1>⏰ Zaman Uygulaması</h1>
+<div class="container">
+    <h2>Bütçe Takip</h2>
+    <input type="text" id="desc" placeholder="Açıklama">
+    <input type="number" id="amount" placeholder="Tutar (negatif = gider)">
+    <button onclick="addTransaction()">Ekle</button>
 
-<!-- SAAT -->
-<div class="card">
-  <div class="label">Canlı Saat</div>
-  <div id="clock" class="time">--:--:--</div>
-</div>
+    <ul id="list"></ul>
 
-<!-- ALARM -->
-<div class="card">
-  <div class="label">Alarm</div>
-  <input type="time" id="alarmTime">
-  <div class="buttons">
-    <button onclick="setAlarm()">Kur</button>
-    <button class="danger" onclick="stopAlarm()">Kapat</button>
-  </div>
-</div>
-
-<!-- TIMER -->
-<div class="card">
-  <div class="label">Zaman Sayacı</div>
-  <div id="timerDisplay" class="time">00:00:00</div>
-  <div class="inputs">
-    <input type="number" id="th" placeholder="Saat">
-    <input type="number" id="tm" placeholder="Dakika">
-    <input type="number" id="ts" placeholder="Saniye">
-  </div>
-  <div class="buttons">
-    <button onclick="timerStart()">Başlat</button>
-    <button class="danger" onclick="timerReset()">Sıfırla</button>
-  </div>
-</div>
-
-<!-- KRONOMETRE -->
-<div class="card">
-  <div class="label">Kronometre</div>
-  <div id="sw" class="time">00:00:00.000</div>
-  <div class="buttons">
-    <button onclick="swStart()">Başlat</button>
-    <button onclick="swPause()">Duraklat</button>
-    <button class="danger" onclick="swReset()">Sıfırla</button>
-  </div>
-</div>
-
-<footer>© 2026 • GitHub Pages</footer>
+    <div class="total">
+        Toplam Bakiye: <span id="balance">0</span> ₺
+    </div>
 </div>
 
 <script>
-/* SAAT */
-setInterval(()=>{
-  const d=new Date();
-  clock.textContent=
-    `${String(d.getHours()).padStart(2,"0")}:`+
-    `${
+    let balance = 1;
+
+    function addTransaction() {
+        const desc = document.getElementById("desc").value;
+        const amount = parseFloat(document.getElementById("amount").value);
+
+        if (!desc || isNaN(amount)) {
+            alert("Lütfen geçerli değer girin.");
+            return;
+        }
+
+        balance += amount;
+        document.getElementById("balance").innerText = balance;
+
+        const li = document.createElement("li");
+        li.innerHTML = `${desc} <span>${amount} ₺</span>`;
+        document.getElementById("list").appendChild(li);
+
+        document.getElementById("desc").value = "";
+        document.getElementById("amount").value = "";
+    }
+</script>
+
+</body>
+</html>
