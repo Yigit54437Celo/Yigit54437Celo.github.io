@@ -2,174 +2,241 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Pro Bütçe Takip</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dijital Cüzdan PRO</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
+:root {
+  --bg:#1e1e2f;
+  --card:#27293d;
+  --text:#fff;
+  --accent:#6c63ff;
+}
+.light {
+  --bg:#f4f6ff;
+  --card:#ffffff;
+  --text:#111;
+  --accent:#574bff;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins}
 body{
-    font-family: Arial;
-    background: linear-gradient(135deg,#667eea,#764ba2);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    margin:0;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  transition:.3s;
 }
-.box{
-    background:white;
-    padding:20px;
-    width:400px;
-    border-radius:12px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+.container{
+  width:420px;
+  background:var(--card);
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 20px 40px rgba(0,0,0,.4);
 }
+h1{text-align:center;margin-bottom:15px}
+.balance{text-align:center;margin-bottom:15px}
+.balance p{font-size:28px;font-weight:600}
 input,select,button{
-    width:100%;
-    padding:8px;
-    margin:5px 0;
+  width:100%;padding:10px;margin-top:8px;
+  border:none;border-radius:10px;
 }
 button{
-    background:#667eea;
-    color:white;
-    border:none;
-    cursor:pointer;
+  background:var(--accent);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
 }
-button:hover{opacity:0.9}
-ul{padding:0;list-style:none}
-li{
-    display:flex;
-    justify-content:space-between;
-    background:#f2f2f2;
-    padding:6px;
-    margin:4px 0;
+button:hover{opacity:.8}
+.transaction{
+  background:#32345a;
+  padding:10px;
+  border-radius:10px;
+  margin-top:8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-.hidden{display:none}
+.light .transaction{background:#eef0ff}
+.income{border-left:5px solid #00ffae}
+.expense{border-left:5px solid #ff4e6a}
+.top-buttons{
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
+}
+canvas{margin-top:15px}
+.login-screen{
+  position:fixed;
+  inset:0;
+  background:#111;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.login-box{
+  background:#222;
+  padding:30px;
+  border-radius:15px;
+  text-align:center;
+}
 </style>
 </head>
+
 <body>
 
-<div class="box">
-
-<!-- LOGIN -->
-<div id="login">
-<h2>Giriş Yap</h2>
-<input type="password" id="pass" placeholder="Şifre oluştur / gir">
-<button onclick="login()">Giriş</button>
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h2>🔐 Giriş</h2>
+    <input type="password" id="password" placeholder="Şifre gir">
+    <button onclick="login()">Giriş Yap</button>
+  </div>
 </div>
 
-<!-- APP -->
-<div id="app" class="hidden">
-<h2>Bütçe Takip</h2>
+<div class="container" id="app" style="display:none;">
+  <h1>💳 Dijital Cüzdan PRO</h1>
 
-<input id="desc" placeholder="Açıklama">
-<input id="amount" type="number" placeholder="Tutar">
-<select id="category">
-<option value="Gelir">Gelir</option>
-<option value="Gıda">Gıda</option>
-<option value="Fatura">Fatura</option>
-<option value="Eğlence">Eğlence</option>
-</select>
+  <div class="top-buttons">
+    <button onclick="toggleTheme()">🌙/☀️</button>
+    <button onclick="exportData()">⬇️ Yedekle</button>
+    <input type="file" onchange="importData(event)">
+  </div>
 
-<button onclick="add()">Ekle</button>
+  <div class="balance">
+    <h3>Toplam Bakiye</h3>
+    <p id="balance">₺0</p>
+  </div>
 
-<ul id="list"></ul>
+  <input type="text" id="desc" placeholder="Açıklama">
+  <input type="number" id="amount" placeholder="Tutar">
+  <input type="date" id="date">
+  
+  <select id="category">
+    <option>Market</option>
+    <option>Fatura</option>
+    <option>Eğlence</option>
+    <option>Maaş</option>
+    <option>Diğer</option>
+  </select>
 
-<h3>Toplam: <span id="total">0</span> ₺</h3>
+  <select id="type">
+    <option value="income">Gelir</option>
+    <option value="expense">Gider</option>
+  </select>
 
-<canvas id="chart"></canvas>
+  <button onclick="addTransaction()">Ekle</button>
 
-<button onclick="logout()" style="background:red;margin-top:10px;">Çıkış</button>
-</div>
+  <input type="date" id="filterDate" onchange="updateUI()" placeholder="Tarihe göre filtre">
 
+  <div id="list"></div>
+
+  <canvas id="chart"></canvas>
 </div>
 
 <script>
-let data = JSON.parse(localStorage.getItem("data")) || [];
-let password = localStorage.getItem("password");
-let total = 0;
-let chart;
+let transactions = JSON.parse(localStorage.getItem("transactions"))||[];
+let theme = localStorage.getItem("theme")||"dark";
+document.body.classList.toggle("light",theme==="light");
 
 function login(){
-    let p = document.getElementById("pass").value;
-    if(!password){
-        localStorage.setItem("password",p);
-        password = p;
+  const pass=document.getElementById("password").value;
+  if(pass==="1234"){
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("app").style.display="block";
+  }else alert("Yanlış şifre!");
+}
+
+function toggleTheme(){
+  document.body.classList.toggle("light");
+  localStorage.setItem("theme",
+    document.body.classList.contains("light")?"light":"dark");
+}
+
+function addTransaction(){
+  const desc=descInput.value;
+  const amount=parseFloat(amountInput.value);
+  const date=dateInput.value;
+  const category=categoryInput.value;
+  const type=typeInput.value;
+  if(!desc||!amount)return alert("Alanları doldur!");
+  transactions.push({desc,amount,date,category,type});
+  localStorage.setItem("transactions",JSON.stringify(transactions));
+  updateUI();
+}
+
+function deleteTransaction(i){
+  transactions.splice(i,1);
+  localStorage.setItem("transactions",JSON.stringify(transactions));
+  updateUI();
+}
+
+let chart;
+
+function updateUI(){
+  const list=document.getElementById("list");
+  const balanceEl=document.getElementById("balance");
+  const filter=document.getElementById("filterDate").value;
+  list.innerHTML="";
+  let balance=0;
+  let income=0;
+  let expense=0;
+
+  transactions.forEach((t,i)=>{
+    if(filter && t.date!==filter)return;
+    balance+=t.type==="income"?t.amount:-t.amount;
+    if(t.type==="income")income+=t.amount;
+    else expense+=t.amount;
+
+    list.innerHTML+=`
+    <div class="transaction ${t.type}">
+      <div>
+        <b>${t.desc}</b><br>
+        ${t.category} | ${t.date}<br>
+        ₺${t.amount}
+      </div>
+      <button onclick="deleteTransaction(${i})">X</button>
+    </div>`;
+  });
+
+  balanceEl.textContent="₺"+balance;
+
+  if(chart)chart.destroy();
+  chart=new Chart(document.getElementById("chart"),{
+    type:"doughnut",
+    data:{
+      labels:["Gelir","Gider"],
+      datasets:[{
+        data:[income,expense],
+        backgroundColor:["#00ffae","#ff4e6a"]
+      }]
     }
-    if(p===password){
-        document.getElementById("login").classList.add("hidden");
-        document.getElementById("app").classList.remove("hidden");
-        load();
-    }else{
-        alert("Şifre yanlış!");
-    }
+  });
 }
 
-function logout(){
-    location.reload();
+function exportData(){
+  const dataStr="data:text/json;charset=utf-8,"+
+  encodeURIComponent(JSON.stringify(transactions));
+  const dl=document.createElement("a");
+  dl.setAttribute("href",dataStr);
+  dl.setAttribute("download","cuzdan_yedek.json");
+  dl.click();
 }
 
-function save(){
-    localStorage.setItem("data",JSON.stringify(data));
+function importData(event){
+  const file=event.target.files[0];
+  const reader=new FileReader();
+  reader.onload=function(e){
+    transactions=JSON.parse(e.target.result);
+    localStorage.setItem("transactions",JSON.stringify(transactions));
+    updateUI();
+  };
+  reader.readAsText(file);
 }
 
-function add(){
-    let desc=document.getElementById("desc").value;
-    let amount=parseFloat(document.getElementById("amount").value);
-    let category=document.getElementById("category").value;
-
-    if(!desc || isNaN(amount)){alert("Boş bırakma!");return;}
-
-    data.push({desc,amount,category});
-    save();
-    load();
-
-    desc.value="";
-}
-
-function remove(index){
-    data.splice(index,1);
-    save();
-    load();
-}
-
-function load(){
-    let list=document.getElementById("list");
-    list.innerHTML="";
-    total=0;
-
-    let categories={};
-
-    data.forEach((item,i)=>{
-        total+=item.amount;
-
-        let li=document.createElement("li");
-        li.innerHTML=`
-        ${item.desc} (${item.category})
-        <span>
-        ${item.amount} ₺
-        <button onclick="remove(${i})">X</button>
-        </span>`;
-        list.appendChild(li);
-
-        categories[item.category]=(categories[item.category]||0)+item.amount;
-    });
-
-    document.getElementById("total").innerText=total;
-
-    drawChart(categories);
-}
-
-function drawChart(categories){
-    if(chart) chart.destroy();
-
-    chart=new Chart(document.getElementById("chart"),{
-        type:"pie",
-        data:{
-            labels:Object.keys(categories),
-            datasets:[{
-                data:Object.values(categories)
-            }]
-        }
-    });
-}
+updateUI();
 </script>
 
 </body>
