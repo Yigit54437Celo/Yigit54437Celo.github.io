@@ -1,243 +1,1084 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dijital Cüzdan PRO</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dijital Cüzdan PRO+</title>
 
-<style>
-:root {
-  --bg:#1e1e2f;
-  --card:#27293d;
-  --text:#fff;
-  --accent:#6c63ff;
-}
-.light {
-  --bg:#f4f6ff;
-  --card:#ffffff;
-  --text:#111;
-  --accent:#574bff;
-}
-*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins}
-body{
-  background:var(--bg);
-  color:var(--text);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-  transition:.3s;
-}
-.container{
-  width:420px;
-  background:var(--card);
-  padding:25px;
-  border-radius:20px;
-  box-shadow:0 20px 40px rgba(0,0,0,.4);
-}
-h1{text-align:center;margin-bottom:15px}
-.balance{text-align:center;margin-bottom:15px}
-.balance p{font-size:28px;font-weight:600}
-input,select,button{
-  width:100%;padding:10px;margin-top:8px;
-  border:none;border-radius:10px;
-}
-button{
-  background:var(--accent);
-  color:white;
-  font-weight:600;
-  cursor:pointer;
-}
-button:hover{opacity:.8}
-.transaction{
-  background:#32345a;
-  padding:10px;
-  border-radius:10px;
-  margin-top:8px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.light .transaction{background:#eef0ff}
-.income{border-left:5px solid #00ffae}
-.expense{border-left:5px solid #ff4e6a}
-.top-buttons{
-  display:flex;
-  gap:10px;
-  margin-bottom:10px;
-}
-canvas{margin-top:15px}
-.login-screen{
-  position:fixed;
-  inset:0;
-  background:#111;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-.login-box{
-  background:#222;
-  padding:30px;
-  border-radius:15px;
-  text-align:center;
-}
-</style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --bg: #0b1020;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.08);
+      --text: #eaf0ff;
+      --muted: rgba(234,240,255,.7);
+      --border: rgba(255,255,255,.14);
+      --accent: #7c5cff;
+      --accent2:#18d7ff;
+      --good: #00ffae;
+      --bad: #ff4e6a;
+      --shadow: 0 20px 50px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    body.light{
+      --bg: #f4f6ff;
+      --card: rgba(0,0,0,.04);
+      --card2: rgba(0,0,0,.06);
+      --text: #0d1220;
+      --muted: rgba(13,18,32,.7);
+      --border: rgba(0,0,0,.10);
+      --accent: #574bff;
+      --accent2:#00a6ff;
+      --shadow: 0 20px 50px rgba(0,0,0,.12);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+    body{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        radial-gradient(1200px 800px at 20% 10%, rgba(124,92,255,.35), transparent 50%),
+        radial-gradient(900px 700px at 80% 10%, rgba(24,215,255,.25), transparent 55%),
+        radial-gradient(900px 700px at 50% 90%, rgba(0,255,174,.12), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      padding:22px;
+      transition:.25s;
+    }
+
+    .app-shell{
+      width:min(980px, 100%);
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:18px;
+    }
+
+    @media (max-width: 980px){
+      .app-shell{grid-template-columns:1fr;}
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .header{
+      padding:18px 18px 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,.08), transparent);
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .brand h1{font-size:18px; font-weight:700; letter-spacing:.2px;}
+    .brand small{color:var(--muted); font-size:12px;}
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .icon-btn, .btn{
+      border:1px solid var(--border);
+      background:var(--card2);
+      color:var(--text);
+      border-radius:14px;
+      padding:10px 12px;
+      cursor:pointer;
+      transition:.15s;
+      font-weight:600;
+      font-size:13px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      user-select:none;
+    }
+    .icon-btn:hover, .btn:hover{transform: translateY(-1px); opacity:.95;}
+    .icon-btn:active, .btn:active{transform: translateY(0); opacity:.9;}
+    .btn.primary{
+      background:linear-gradient(135deg, var(--accent), var(--accent2));
+      border:none;
+      color:white;
+    }
+    .btn.danger{
+      background: rgba(255,78,106,.15);
+      border:1px solid rgba(255,78,106,.35);
+      color: var(--text);
+    }
+
+    .content{padding:16px 18px 18px;}
+
+    .cards{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .stat{
+      padding:14px;
+      border:1px solid var(--border);
+      background:var(--card2);
+      border-radius:16px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .stat .label{font-size:12px; color:var(--muted);}
+    .stat .value{font-size:20px; font-weight:700;}
+    .pill{
+      align-self:flex-start;
+      margin-top:2px;
+      font-size:11px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+    }
+
+    .form{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:8px;
+    }
+    .form .full{grid-column: 1 / -1;}
+    label{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    input, select{
+      width:100%;
+      padding:11px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.12);
+      color:var(--text);
+      outline:none;
+      transition:.15s;
+    }
+    body.light input, body.light select{
+      background: rgba(255,255,255,.8);
+      color: var(--text);
+    }
+    input:focus, select:focus{
+      border-color: rgba(124,92,255,.65);
+      box-shadow: 0 0 0 4px rgba(124,92,255,.15);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .segmented{
+      display:flex;
+      border:1px solid var(--border);
+      background:var(--card2);
+      border-radius:14px;
+      overflow:hidden;
+    }
+    .segmented button{
+      border:none;
+      background:transparent;
+      padding:10px 12px;
+      color:var(--muted);
+      cursor:pointer;
+      font-weight:700;
+      font-size:12px;
+      transition:.15s;
+    }
+    .segmented button.active{
+      background: linear-gradient(135deg, rgba(124,92,255,.35), rgba(24,215,255,.22));
+      color: var(--text);
+    }
+
+    .list-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:14px 18px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), transparent);
+    }
+    .list-header h2{font-size:14px;}
+    .filters{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .filters input, .filters select{
+      padding:9px 10px;
+      border-radius:12px;
+      font-size:12px;
+    }
+
+    .tx-list{
+      padding: 10px 10px 14px;
+      max-height: 560px;
+      overflow:auto;
+    }
+    .tx{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:12px;
+      margin:8px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:var(--card2);
+    }
+    .tx-left{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .tx-title{
+      font-weight:700;
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .tx-meta{
+      font-size:11px;
+      color:var(--muted);
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .tag{
+      font-size:10px;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+    }
+    .tx-right{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:8px;
+      flex-shrink:0;
+    }
+    .amount{
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .amount.income{color: var(--good);}
+    .amount.expense{color: var(--bad);}
+
+    .tx .bar{
+      width:5px;
+      align-self:stretch;
+      border-radius:999px;
+      background: rgba(255,255,255,.12);
+    }
+    .tx.income .bar{ background: linear-gradient(180deg, var(--good), rgba(0,255,174,.25)); }
+    .tx.expense .bar{ background: linear-gradient(180deg, var(--bad), rgba(255,78,106,.25)); }
+
+    .mini-actions{
+      display:flex;
+      gap:8px;
+    }
+    .mini-actions button{
+      padding:7px 9px;
+      border-radius:12px;
+      font-size:12px;
+    }
+
+    .charts{
+      padding: 14px 18px 18px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 980px){
+      .charts{grid-template-columns:1fr;}
+    }
+    .chart-card{
+      border:1px solid var(--border);
+      background: var(--card2);
+      border-radius:16px;
+      padding:12px;
+    }
+    .chart-card h3{
+      font-size:13px;
+      margin-bottom:8px;
+      color: var(--muted);
+      font-weight:700;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%);
+      background: rgba(0,0,0,.7);
+      color:white;
+      border:1px solid rgba(255,255,255,.18);
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:13px;
+      display:none;
+      gap:10px;
+      align-items:center;
+      max-width:min(520px, 92vw);
+      box-shadow: 0 16px 45px rgba(0,0,0,.4);
+      backdrop-filter: blur(10px);
+      z-index:9999;
+    }
+    body.light .toast{ background: rgba(20,20,30,.78); }
+    .toast.show{display:flex; animation: pop .18s ease-out;}
+    @keyframes pop{
+      from{ transform: translateX(-50%) translateY(8px); opacity:0;}
+      to{ transform: translateX(-50%) translateY(0); opacity:1;}
+    }
+
+    /* Login overlay */
+    .overlay{
+      position:fixed;
+      inset:0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      z-index:9998;
+    }
+    .login{
+      width:min(420px, 92vw);
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .login .top{
+      padding:16px 18px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), transparent);
+    }
+    .login .top h2{font-size:16px;}
+    .login .body{padding:16px 18px 18px;}
+    .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.4}
+    .file-input{
+      position:relative;
+      overflow:hidden;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .file-input input[type="file"]{
+      position:absolute;
+      inset:0;
+      opacity:0;
+      cursor:pointer;
+    }
+  </style>
 </head>
 
 <body>
-
-<div class="login-screen" id="loginScreen">
-  <div class="login-box">
-    <h2>🔐 Giriş</h2>
-    <input type="password" id="password" placeholder="Şifre gir">
-    <button onclick="login()">Giriş Yap</button>
+  <!-- LOGIN -->
+  <div class="overlay" id="loginOverlay">
+    <div class="login">
+      <div class="top">
+        <h2>🔐 Dijital Cüzdan PRO+</h2>
+        <button class="icon-btn" id="loginThemeBtn" type="button" title="Tema">🌙/☀️</button>
+      </div>
+      <div class="body">
+        <label>
+          Şifre
+          <input type="password" id="password" placeholder="Şifre gir (varsayılan: 1234)" autocomplete="current-password">
+        </label>
+        <div class="row" style="margin-top:12px; justify-content:space-between;">
+          <button class="btn primary" id="loginBtn" type="button">Giriş Yap</button>
+          <button class="btn" id="forgotBtn" type="button" title="Kod içindeki şifreyi değiştirerek güvenli hale getirebilirsin.">İpucu</button>
+        </div>
+        <div class="hint" id="hintBox" style="display:none;">
+          Varsayılan şifre <b>1234</b>. Güvenlik için script içindeki <code>APP_PASSWORD</code> değerini değiştir.
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<div class="container" id="app" style="display:none;">
-  <h1>💳 Dijital Cüzdan PRO</h1>
+  <!-- APP -->
+  <div class="app-shell" id="app" style="display:none;">
+    <!-- LEFT -->
+    <section class="panel">
+      <div class="header">
+        <div class="brand">
+          <h1>💳 Dijital Cüzdan PRO+</h1>
+          <small>Yerel (LocalStorage) kayıt • Tek dosya</small>
+        </div>
+        <div class="actions">
+          <button class="icon-btn" id="themeBtn" type="button" title="Tema">🌙/☀️</button>
+          <button class="icon-btn" id="lockBtn" type="button" title="Kilitle">🔒</button>
+        </div>
+      </div>
 
-  <div class="top-buttons">
-    <button onclick="toggleTheme()">🌙/☀️</button>
-    <button onclick="exportData()">⬇️ Yedekle</button>
-    <input type="file" onchange="importData(event)">
+      <div class="content">
+        <div class="cards">
+          <div class="stat">
+            <div class="label">Toplam Bakiye</div>
+            <div class="value" id="balance">₺0,00</div>
+            <div class="pill" id="balanceNote">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">Bu Filtrede</div>
+            <div class="value" id="scopeTotal">₺0,00</div>
+            <div class="pill" id="scopeNote">Gelir/Gider</div>
+          </div>
+        </div>
+
+        <div class="row" style="justify-content:space-between; align-items:flex-end;">
+          <div>
+            <div class="label" style="font-size:12px; color:var(--muted); margin-bottom:6px;">Tür</div>
+            <div class="segmented" id="typeSeg">
+              <button type="button" data-type="income" class="active">Gelir</button>
+              <button type="button" data-type="expense">Gider</button>
+            </div>
+          </div>
+          <button class="btn primary" id="addBtn" type="button" title="Enter ile de ekleyebilirsin">➕ Ekle</button>
+        </div>
+
+        <div class="form" style="margin-top:10px;">
+          <label class="full">
+            Açıklama
+            <input type="text" id="desc" placeholder="Örn: Market, Maaş, Fatura..." maxlength="60">
+          </label>
+
+          <label>
+            Tutar (₺)
+            <input type="number" id="amount" placeholder="Örn: 250" min="0" step="0.01">
+          </label>
+
+          <label>
+            Tarih
+            <input type="date" id="date">
+          </label>
+
+          <label class="full">
+            Kategori
+            <select id="category"></select>
+          </label>
+        </div>
+
+        <div class="row" style="margin-top:12px; justify-content:space-between;">
+          <div class="row">
+            <button class="btn" id="quickToday" type="button">Bugün</button>
+            <button class="btn" id="quickMonth" type="button">Bu Ay</button>
+            <button class="btn" id="quickAll" type="button">Tümü</button>
+          </div>
+
+          <div class="row">
+            <button class="btn" id="manageCats" type="button">🏷️ Kategoriler</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px; justify-content:space-between;">
+          <button class="btn" id="exportBtn" type="button">⬇️ Yedekle</button>
+          <span class="file-input btn" title="Yedek dosyasını içe aktar">
+            📥 İçe Aktar
+            <input type="file" id="importFile" accept="application/json">
+          </span>
+          <button class="btn danger" id="resetBtn" type="button" title="Tüm işlemleri siler">🧹 Sıfırla</button>
+        </div>
+
+        <div class="hint" style="margin-top:10px;">
+          İpucu: Açıklama alanındayken <b>Enter</b> ile ekleme yapabilirsin. Veriler tarayıcıda saklanır (LocalStorage).
+        </div>
+      </div>
+
+      <div class="charts">
+        <div class="chart-card">
+          <h3>Gelir / Gider</h3>
+          <canvas id="chartMain" height="160"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Kategori Dağılımı (Filtre)</h3>
+          <canvas id="chartCat" height="160"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT -->
+    <section class="panel">
+      <div class="list-header">
+        <h2>📌 İşlemler</h2>
+        <div class="filters">
+          <input type="search" id="search" placeholder="Ara (açıklama)" />
+          <input type="date" id="filterDate" title="Tarihe göre filtre">
+          <select id="filterCat" title="Kategori filtre">
+            <option value="">Tüm Kategoriler</option>
+          </select>
+          <select id="filterType" title="Tür filtre">
+            <option value="">Tümü</option>
+            <option value="income">Gelir</option>
+            <option value="expense">Gider</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tx-list" id="list"></div>
+    </section>
   </div>
 
-  <div class="balance">
-    <h3>Toplam Bakiye</h3>
-    <p id="balance">₺0</p>
-  </div>
-
-  <input type="text" id="desc" placeholder="Açıklama">
-  <input type="number" id="amount" placeholder="Tutar">
-  <input type="date" id="date">
-  
-  <select id="category">
-    <option>Market</option>
-    <option>Fatura</option>
-    <option>Eğlence</option>
-    <option>Maaş</option>
-    <option>Diğer</option>
-  </select>
-
-  <select id="type">
-    <option value="income">Gelir</option>
-    <option value="expense">Gider</option>
-  </select>
-
-  <button onclick="addTransaction()">Ekle</button>
-
-  <input type="date" id="filterDate" onchange="updateUI()" placeholder="Tarihe göre filtre">
-
-  <div id="list"></div>
-
-  <canvas id="chart"></canvas>
-</div>
+  <div class="toast" id="toast"></div>
 
 <script>
-let transactions = JSON.parse(localStorage.getItem("transactions"))||[];
-let theme = localStorage.getItem("theme")||"dark";
-document.body.classList.toggle("light",theme==="light");
+/* =========================
+   CONFIG
+========================= */
+const APP_PASSWORD = "1234"; // Güvenlik için değiştir
+const LS_KEYS = {
+  TX: "walletpro_transactions_v2",
+  THEME: "walletpro_theme_v2",
+  CATS: "walletpro_categories_v2"
+};
 
-function login(){
-  const pass=document.getElementById("password").value;
-  if(pass==="1234"){
-    document.getElementById("loginScreen").style.display="none";
-    document.getElementById("app").style.display="block";
-  }else alert("Yanlış şifre!");
+const DEFAULT_CATEGORIES = ["Market", "Fatura", "Eğlence", "Maaş", "Ulaşım", "Kira", "Sağlık", "Diğer"];
+
+/* =========================
+   UTIL
+========================= */
+const $ = (id) => document.getElementById(id);
+
+function formatTRY(n){
+  const num = Number(n || 0);
+  return new Intl.NumberFormat("tr-TR", { style:"currency", currency:"TRY", maximumFractionDigits:2 }).format(num);
 }
 
+function todayISO(){
+  const d = new Date();
+  const tzOffset = d.getTimezoneOffset() * 60000;
+  return new Date(d - tzOffset).toISOString().slice(0,10);
+}
+
+function monthRangeISO(){
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const first = new Date(y, m, 1);
+  const last = new Date(y, m + 1, 0);
+  const tzOffset = now.getTimezoneOffset() * 60000;
+  const f = new Date(first - tzOffset).toISOString().slice(0,10);
+  const l = new Date(last - tzOffset).toISOString().slice(0,10);
+  return { f, l };
+}
+
+let toastTimer;
+function toast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+function safeParseJSON(s, fallback){
+  if (s === null || s === undefined || s === "") return fallback;
+  try {
+    const parsed = JSON.parse(s);
+    return (parsed === null || parsed === undefined) ? fallback : parsed;
+  } catch {
+    return fallback;
+  }
+}
+
+/* =========================
+   STATE
+========================= */
+let transactions = safeParseJSON(localStorage.getItem(LS_KEYS.TX), []);
+let categories = safeParseJSON(localStorage.getItem(LS_KEYS.CATS), DEFAULT_CATEGORIES);
+let theme = localStorage.getItem(LS_KEYS.THEME) || "dark";
+
+/* =========================
+   THEME
+========================= */
+function applyTheme(){
+  document.body.classList.toggle("light", theme === "light");
+  localStorage.setItem(LS_KEYS.THEME, theme);
+}
 function toggleTheme(){
-  document.body.classList.toggle("light");
-  localStorage.setItem("theme",
-    document.body.classList.contains("light")?"light":"dark");
+  theme = (theme === "light") ? "dark" : "light";
+  applyTheme();
+  // chart renkleri tema değişince yeniden çizilsin
+  updateUI();
+}
+
+/* =========================
+   LOGIN
+========================= */
+function lockApp(){
+  $("app").style.display = "none";
+  $("loginOverlay").style.display = "flex";
+  $("password").value = "";
+  $("password").focus();
+}
+function unlockApp(){
+  $("loginOverlay").style.display = "none";
+  $("app").style.display = "grid";
+  updateUI();
+}
+
+/* =========================
+   CATEGORY UI
+========================= */
+function renderCategorySelects(){
+  const catSel = $("category");
+  const filterSel = $("filterCat");
+
+  catSel.innerHTML = "";
+  categories.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c; o.textContent = c;
+    catSel.appendChild(o);
+  });
+
+  const currentFilter = filterSel.value;
+  filterSel.innerHTML = '<option value="">Tüm Kategoriler</option>';
+  categories.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c; o.textContent = c;
+    filterSel.appendChild(o);
+  });
+  filterSel.value = currentFilter || "";
+}
+
+function manageCategories(){
+  const current = categories.join(", ");
+  const input = prompt("Kategorileri virgülle ayırarak gir:\nÖrn: Market, Fatura, Maaş", current);
+  if(input === null) return;
+  const next = input.split(",").map(x => x.trim()).filter(Boolean);
+  if(next.length === 0) return toast("En az 1 kategori olmalı.");
+  categories = Array.from(new Set(next));
+  localStorage.setItem(LS_KEYS.CATS, JSON.stringify(categories));
+  renderCategorySelects();
+  updateUI();
+  toast("Kategoriler güncellendi.");
+}
+
+/* =========================
+   ADD / DELETE
+========================= */
+let currentType = "income";
+
+function setType(t){
+  currentType = t;
+  document.querySelectorAll("#typeSeg button").forEach(b => {
+    b.classList.toggle("active", b.dataset.type === t);
+  });
 }
 
 function addTransaction(){
-  const desc=descInput.value;
-  const amount=parseFloat(amountInput.value);
-  const date=dateInput.value;
-  const category=categoryInput.value;
-  const type=typeInput.value;
-  if(!desc||!amount)return alert("Alanları doldur!");
-  transactions.push({desc,amount,date,category,type});
-  localStorage.setItem("transactions",JSON.stringify(transactions));
-  updateUI();
-}
+  const desc = $("desc").value.trim();
+  const amount = parseFloat($("amount").value);
+  const date = $("date").value || todayISO();
+  const category = $("category").value;
+  const type = currentType;
 
-function deleteTransaction(i){
-  transactions.splice(i,1);
-  localStorage.setItem("transactions",JSON.stringify(transactions));
-  updateUI();
-}
+  if(!desc) return toast("Açıklama zorunlu.");
+  if(!Number.isFinite(amount) || amount <= 0) return toast("Tutar > 0 olmalı.");
 
-let chart;
-
-function updateUI(){
-  const list=document.getElementById("list");
-  const balanceEl=document.getElementById("balance");
-  const filter=document.getElementById("filterDate").value;
-  list.innerHTML="";
-  let balance=0;
-  let income=0;
-  let expense=0;
-
-  transactions.forEach((t,i)=>{
-    if(filter && t.date!==filter)return;
-    balance+=t.type==="income"?t.amount:-t.amount;
-    if(t.type==="income")income+=t.amount;
-    else expense+=t.amount;
-
-    list.innerHTML+=`
-    <div class="transaction ${t.type}">
-      <div>
-        <b>${t.desc}</b><br>
-        ${t.category} | ${t.date}<br>
-        ₺${t.amount}
-      </div>
-      <button onclick="deleteTransaction(${i})">X</button>
-    </div>`;
+  transactions.push({
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2),
+    desc,
+    amount: Number(amount.toFixed(2)),
+    date,
+    category,
+    type,
+    createdAt: Date.now()
   });
 
-  balanceEl.textContent="₺"+balance;
+  localStorage.setItem(LS_KEYS.TX, JSON.stringify(transactions));
+  $("desc").value = "";
+  $("amount").value = "";
+  $("desc").focus();
 
-  if(chart)chart.destroy();
-  chart=new Chart(document.getElementById("chart"),{
-    type:"doughnut",
-    data:{
-      labels:["Gelir","Gider"],
-      datasets:[{
-        data:[income,expense],
-        backgroundColor:["#00ffae","#ff4e6a"]
-      }]
-    }
-  });
+  updateUI();
+  toast("Eklendi.");
 }
 
+function deleteTransaction(id){
+  const tx = transactions.find(x => x.id === id);
+  if(!tx) return;
+
+  const ok = confirm(`Silinsin mi?\n\n${tx.desc}\n${formatTRY(tx.amount)} • ${tx.category} • ${tx.date}`);
+  if(!ok) return;
+
+  transactions = transactions.filter(x => x.id !== id);
+  localStorage.setItem(LS_KEYS.TX, JSON.stringify(transactions));
+  updateUI();
+  toast("Silindi.");
+}
+
+/* =========================
+   EXPORT / IMPORT / RESET
+========================= */
 function exportData(){
-  const dataStr="data:text/json;charset=utf-8,"+
-  encodeURIComponent(JSON.stringify(transactions));
-  const dl=document.createElement("a");
-  dl.setAttribute("href",dataStr);
-  dl.setAttribute("download","cuzdan_yedek.json");
+  const payload = {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    categories,
+    transactions
+  };
+  const dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+  const dl = document.createElement("a");
+  dl.href = dataStr;
+  dl.download = "cuzdan_yedek_v2.json";
   dl.click();
+  toast("Yedek indirildi.");
 }
 
-function importData(event){
-  const file=event.target.files[0];
-  const reader=new FileReader();
-  reader.onload=function(e){
-    transactions=JSON.parse(e.target.result);
-    localStorage.setItem("transactions",JSON.stringify(transactions));
+function importData(file){
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const obj = safeParseJSON(e.target.result, null);
+    if(!obj) return toast("JSON okunamadı.");
+
+    // eski format destek: direkt array gelirse
+    if(Array.isArray(obj)){
+      transactions = obj.map((t,i) => ({
+        id: t.id || String(Date.now()+i),
+        desc: t.desc || "İşlem",
+        amount: Number(t.amount || 0),
+        date: t.date || todayISO(),
+        category: t.category || "Diğer",
+        type: (t.type === "expense" ? "expense" : "income"),
+        createdAt: t.createdAt || Date.now()
+      }));
+    } else {
+      if(Array.isArray(obj.categories)) categories = obj.categories;
+      if(Array.isArray(obj.transactions)) transactions = obj.transactions;
+    }
+
+    localStorage.setItem(LS_KEYS.CATS, JSON.stringify(categories));
+    localStorage.setItem(LS_KEYS.TX, JSON.stringify(transactions));
+    renderCategorySelects();
     updateUI();
+    toast("İçe aktarıldı.");
   };
   reader.readAsText(file);
 }
 
-updateUI();
+function resetAll(){
+  const ok = confirm("Tüm işlemler ve kategoriler sıfırlansın mı? Bu işlem geri alınamaz.");
+  if(!ok) return;
+  transactions = [];
+  categories = [...DEFAULT_CATEGORIES];
+  localStorage.setItem(LS_KEYS.TX, JSON.stringify(transactions));
+  localStorage.setItem(LS_KEYS.CATS, JSON.stringify(categories));
+  renderCategorySelects();
+  updateUI();
+  toast("Sıfırlandı.");
+}
+
+/* =========================
+   FILTERS + UI
+========================= */
+let chartMain, chartCat;
+
+function getFiltered(){
+  const q = $("search").value.trim().toLowerCase();
+  const fDate = $("filterDate").value;
+  const fCat = $("filterCat").value;
+  const fType = $("filterType").value;
+
+  return transactions
+    .slice()
+    .sort((a,b) => (b.date.localeCompare(a.date)) || ((b.createdAt||0)-(a.createdAt||0)))
+    .filter(t => !q || (t.desc||"").toLowerCase().includes(q))
+    .filter(t => !fDate || t.date === fDate)
+    .filter(t => !fCat || t.category === fCat)
+    .filter(t => !fType || t.type === fType);
+}
+
+function computeTotals(list){
+  let income = 0, expense = 0;
+  for(const t of list){
+    if(t.type === "income") income += t.amount;
+    else expense += t.amount;
+  }
+  return { income, expense, net: income - expense };
+}
+
+function updateCharts(scopeTotals, catMap){
+  // Main doughnut
+  if(chartMain) chartMain.destroy();
+  chartMain = new Chart($("chartMain"), {
+    type: "doughnut",
+    data: {
+      labels: ["Gelir", "Gider"],
+      datasets: [{
+        data: [scopeTotals.income, scopeTotals.expense],
+        backgroundColor: ["#00ffae", "#ff4e6a"]
+      }]
+    },
+    options:{
+      plugins:{
+        legend:{ labels:{ color: getComputedStyle(document.body).getPropertyValue("--text") } }
+      }
+    }
+  });
+
+  // Category chart (bar)
+  const labels = Object.keys(catMap);
+  const values = labels.map(k => catMap[k]);
+  if(chartCat) chartCat.destroy();
+  chartCat = new Chart($("chartCat"), {
+    type:"bar",
+    data:{
+      labels,
+      datasets:[{
+        label:"Toplam (₺)",
+        data: values
+      }]
+    },
+    options:{
+      plugins:{
+        legend:{ display:false }
+      },
+      scales:{
+        x:{ ticks:{ color: getComputedStyle(document.body).getPropertyValue("--muted") } },
+        y:{ ticks:{ color: getComputedStyle(document.body).getPropertyValue("--muted") } }
+      }
+    }
+  });
+}
+
+function updateUI(){
+  // Global totals (all tx)
+  const allTotals = computeTotals(transactions);
+  $("balance").textContent = formatTRY(allTotals.net);
+  $("balanceNote").textContent = `Gelir ${formatTRY(allTotals.income)} • Gider ${formatTRY(allTotals.expense)}`;
+
+  // Filtered totals (scope)
+  const filtered = getFiltered();
+  const scopeTotals = computeTotals(filtered);
+  $("scopeTotal").textContent = formatTRY(scopeTotals.net);
+  $("scopeNote").textContent = `Gelir ${formatTRY(scopeTotals.income)} • Gider ${formatTRY(scopeTotals.expense)}`;
+
+  // Render list
+  const list = $("list");
+  list.innerHTML = "";
+
+  if(filtered.length === 0){
+    list.innerHTML = `<div style="padding:18px; color:var(--muted); text-align:center;">
+      Kayıt yok. Filtreleri temizle veya yeni işlem ekle.
+    </div>`;
+  } else {
+    for(const t of filtered){
+      const div = document.createElement("div");
+      div.className = `tx ${t.type}`;
+      div.innerHTML = `
+        <div class="bar"></div>
+        <div class="tx-left">
+          <div class="tx-title" title="${escapeHtml(t.desc)}">${escapeHtml(t.desc)}</div>
+          <div class="tx-meta">
+            <span class="tag">${escapeHtml(t.category || "Diğer")}</span>
+            <span class="tag">${escapeHtml(t.date || "")}</span>
+            <span class="tag">${t.type === "income" ? "Gelir" : "Gider"}</span>
+          </div>
+        </div>
+        <div class="tx-right">
+          <div class="amount ${t.type}">
+            ${t.type === "income" ? "+" : "-"} ${formatTRY(t.amount)}
+          </div>
+          <div class="mini-actions">
+            <button class="btn danger" type="button" data-del="${t.id}">Sil</button>
+          </div>
+        </div>
+      `;
+      list.appendChild(div);
+    }
+
+    // bind delete buttons
+    list.querySelectorAll("[data-del]").forEach(btn=>{
+      btn.addEventListener("click", ()=> deleteTransaction(btn.getAttribute("data-del")));
+    });
+  }
+
+  // Charts: category aggregation based on filtered
+  const catMap = {};
+  for(const t of filtered){
+    const key = t.category || "Diğer";
+    const signed = (t.type === "income") ? t.amount : -t.amount;
+    catMap[key] = (catMap[key] || 0) + signed;
+  }
+  updateCharts(scopeTotals, catMap);
+}
+
+function escapeHtml(str){
+  return String(str || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+/* =========================
+   QUICK FILTERS
+========================= */
+function setQuickAll(){
+  $("filterDate").value = "";
+  $("search").value = "";
+  $("filterCat").value = "";
+  $("filterType").value = "";
+  updateUI();
+  toast("Filtre: Tümü");
+}
+
+function setQuickToday(){
+  $("filterDate").value = todayISO();
+  updateUI();
+  toast("Filtre: Bugün");
+}
+
+function setQuickMonth(){
+  // Bu ay için: date tek gün seçiyor; bu yüzden arama/filtreyi date yerine query ile yapamayız.
+  // Pratik çözüm: Bu ay işlemlerini listede göstermek için search'e dokunmadan date filtresi kapalı,
+  // fakat listede client-side aralık filtrelemesi yapalım.
+  // (UI'da basit kalsın diye date input yerine internal month filter)
+  const { f, l } = monthRangeISO();
+  const origGetFiltered = getFiltered;
+  getFiltered = function(){
+    const base = origGetFiltered();
+    return base.filter(t => t.date >= f && t.date <= l);
+  };
+  updateUI();
+  // restore
+  getFiltered = origGetFiltered;
+  toast("Filtre: Bu Ay (liste)");
+}
+
+/* =========================
+   EVENTS
+========================= */
+function wireEvents(){
+  // theme buttons
+  $("themeBtn").addEventListener("click", toggleTheme);
+  $("loginThemeBtn").addEventListener("click", toggleTheme);
+
+  // login
+  $("loginBtn").addEventListener("click", () => {
+    const pass = $("password").value;
+    if(pass === APP_PASSWORD){
+      unlockApp();
+      toast("Hoş geldin.");
+    } else {
+      toast("Yanlış şifre.");
+      $("password").focus();
+    }
+  });
+  $("password").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") $("loginBtn").click();
+  });
+  $("forgotBtn").addEventListener("click", ()=>{
+    const box = $("hintBox");
+    box.style.display = (box.style.display === "none") ? "block" : "none";
+  });
+
+  // lock
+  $("lockBtn").addEventListener("click", lockApp);
+
+  // segmented type
+  $("typeSeg").addEventListener("click", (e)=>{
+    const b = e.target.closest("button[data-type]");
+    if(!b) return;
+    setType(b.dataset.type);
+  });
+
+  // add
+  $("addBtn").addEventListener("click", addTransaction);
+  $("desc").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") addTransaction();
+  });
+  $("amount").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") addTransaction();
+  });
+
+  // filters
+  ["search","filterDate","filterCat","filterType"].forEach(id=>{
+    $(id).addEventListener("input", updateUI);
+    $(id).addEventListener("change", updateUI);
+  });
+
+  // quick filters
+  $("quickAll").addEventListener("click", setQuickAll);
+  $("quickToday").addEventListener("click", setQuickToday);
+  $("quickMonth").addEventListener("click", setQuickMonth);
+
+  // category manager
+  $("manageCats").addEventListener("click", manageCategories);
+
+  // export/import/reset
+  $("exportBtn").addEventListener("click", exportData);
+  $("importFile").addEventListener("change", (e)=>{
+    const file = e.target.files?.[0];
+    if(file) importData(file);
+    e.target.value = ""; // aynı dosyayı tekrar seçebilmek için
+  });
+  $("resetBtn").addEventListener("click", resetAll);
+}
+
+/* =========================
+   INIT
+========================= */
+(function init(){
+  applyTheme();
+  renderCategorySelects();
+
+  // default date
+  $("date").value = todayISO();
+
+  // start locked
+  wireEvents();
+  lockApp();
+
+  // favicon 404 uyarısını engellemek istersen
+  // head içine <link rel="icon" href="data:," /> ekleyebilirsin.
+})();
 </script>
+
+<!-- favicon 404 istemiyorsan aç:
+<link rel="icon" href="data:,">
+-->
 
 </body>
 </html>
